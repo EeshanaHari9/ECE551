@@ -30,7 +30,7 @@ module SPI_mnrch (
             SS_n_reg <= 1'b1;
             SCLK <= 1'b1;   // SCLK normally high
             MOSI <= 1'b0;
-            done <= 1'b0;
+            //done <= 1'b0;
             done_reg <= 1'b0;
             state <= IDLE;
             SCLK_div <= 5'b10111;
@@ -39,14 +39,14 @@ module SPI_mnrch (
         end else begin
             case (state)
                 IDLE: begin
-                    done <= 1'b0;
+                    done_reg <= 1'b0;
                     SS_n <= 1'b1;
                     if (snd) begin    
                         shft_reg <= cmd;    
                         SS_n <= 1'b0;   // Activate slave select
                         SS_n_reg <= 1'b0;
                         SCLK_div <= 5'b10111;
-                        bit_cntr <= 5'b10000;
+                        bit_cntr <= 4'b0000;
                         state <= WAIT;
                     end
                 end
@@ -71,9 +71,8 @@ module SPI_mnrch (
                             shft_reg <= {shft_reg[14:0], MISO_samp};  
                             bit_cntr <= bit_cntr + 1;
                         end
-                        
-                        if (bit_cntr == 5'b10000) begin  // Stop at 15 shifts (16 bits total)
-			    bit_cntr <= 5'b00000;
+                        //change 5 bit
+                        if (bit_cntr == 4'b1111) begin  // Stop at 15 shifts (16 bits total)
                             state <= DONE;
                         end
                         SCLK_div <= 5'b10111;
@@ -86,7 +85,7 @@ module SPI_mnrch (
                     SS_n_reg <= 1'b1;
                     if (SCLK_div == 5'b00000) begin
                         SS_n <= SS_n_reg;
-                        done <= 1'b1;
+                        done_reg <= 1'b1;
                         resp <= shft_reg;
                         state <= IDLE;
                     end else begin
@@ -96,4 +95,19 @@ module SPI_mnrch (
             endcase
         end
     end
+
+    
+/*
+	always_ff @(posedge clk or negedge rst_n) begin
+		if(!rst_n) begin
+			done <= 1'd0;
+		end
+		else begin
+			done <= done_reg;
+		end
+	end
+	
+
+*/
+	assign done = done_reg;
 endmodule
