@@ -46,13 +46,18 @@ module nonoverlap (
         	else 
             		lowIn_prev <= lowIn_curr;
     	end
+	
+	logic highChanged, lowChanged;
+
+	assign highChanged = (highIn_prev != highIn_curr);
+	assign lowChanged = (lowIn_prev != lowIn_curr);
 
     	//change detection logic - compare current and previous value to see if theyre different
     	always_ff @(posedge clk or negedge rst_n) begin
         	if (!rst_n)
             		changed <= 0;
        	 	else 
-            		changed <= (highIn_prev != highIn_curr) || (lowIn_prev != lowIn_curr);
+            		changed <=  highChanged | lowChanged;
     	end
 	
     	//FSM change state logic at each posedge of clock change load new state value
@@ -80,6 +85,9 @@ module nonoverlap (
             		CNT_32:  
                 		if (cnt == 27)  //counter val changed to 27 to account for states taking up a clk cycle and metastability flops
                    			next_state = OUT_STATE;
+
+				else if (changed) 
+					next_state = IDLE;
                 		else 
                     			next_state = CNT_32; //until counter is full 
 
@@ -102,6 +110,8 @@ module nonoverlap (
             		cnt <= 0;
         	else if (state == CNT_32)	//once in count stage begin counter - this is the way the logic is set up so the 
             		cnt <= cnt + 1;
+		else if (changed)
+			cnt <= 0;
         	else  
             		cnt <= 0;		//keep at 0 otherwise
     	end
@@ -112,10 +122,7 @@ module nonoverlap (
         		highOut <= 0;
         		lowOut <= 0;
     		end 
-		else if (state == WAIT || state == CNT_32) begin	//in state WAIT OR CNT_32 keep outputs low
-        		highOut <= 0;
-        		lowOut <= 0;
-    		end 
+		
 		//logic for output - stop overlap
 		else if (state == OUT_STATE) begin
         		if (highIn_curr && !lowIn_curr) begin	//if high highIn and low lowIn -> let highIn be high
@@ -131,6 +138,11 @@ module nonoverlap (
             			lowOut <= 0;  // Ensures mutual exclusivity
         		end
     		end
+
+		else if (state == WAIT || state == CNT_32) begin	//in state WAIT OR CNT_32 keep outputs low
+        		highOut <= 0;
+        		lowOut <= 0;
+    		end 
 	end
 
 endmodule
