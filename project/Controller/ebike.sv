@@ -42,6 +42,11 @@ module ebike (
             .drv_mag(drv_mag)
         );
 
+
+        wire PWM_synch;
+        wire highGrn, lowGrn, highYlw, lowYlw, highBlu, lowBlu;
+        wire [10:0] duty; 
+        wire selBlu, selYlw, selGrn; //these are the 2 bit vectors that will be used to control the FET's in mtr_drv
         brushless brushless(
             .clk(clk),
             .rst_n(rst_n),
@@ -56,6 +61,23 @@ module ebike (
             .selGrn(selGrn), //this signal will come from the PWM module -> remember how mtr_drv and brushless connected to eachother
             .selYlw(selYlw), //this signal will come from the PWM module -> remember how mtr_drv and brushless connected to eachother
             .selBlu(selBlu) //this signal will come from the PWM module -> remember how mtr_drv and brushless connected to eachother
+        );
+
+        //mtr_drv instantiation
+        mtr_drv mtr_drv(
+            .clk(clk),
+            .rst_n(rst_n),
+            .duty(duty), //this signal will come from the PWM module -> remember how mtr_drv and brushless connected to eachother
+            .selGrn(selGrn), //this signal will come from the PWM module -> remember how mtr_drv and brushless connected to eachother
+            .selYlw(selYlw), //this signal will come from the PWM module -> remember how mtr_drv and brushless connected to eachother
+            .selBlu(selBlu), //this signal will come from the PWM module -> remember how mtr_drv and brushless connected to eachother
+            .PWM_synch(PWM_synch), //this signal will come from the PWM module -> remember how mtr_drv and brushless connected to eachother
+            .highGrn(highGrn), //this signal will come from the PWM module -> remember how mtr_drv and brushless connected to eachother
+            .lowGrn(lowGrn), //this signal will come from the PWM module -> remember how mtr_drv and brushless connected to eachother
+            .highYlw(highYlw), //this signal will come from the PWM module -> remember how mtr_drv and brushless connected to eachother
+            .lowYlw(lowYlw), //this signal will come from the PWM module -> remember how mtr_drv and brushless connected to eachother
+            .highBlu(highBlu), //this signal will come from the PWM module -> remember how mtr_drv and brushless connected to eachother
+            .lowBlu(lowBlu) //this signal will come from the PWM module -> remember how mtr_drv and brushless connected to eachother
         );
 
         
