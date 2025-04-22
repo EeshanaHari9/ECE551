@@ -59,9 +59,23 @@ module sensorCondition_tb;
         
 
         //simulate fast pedaling, cadence_raw val iterates quickly
-        repeat (10000000) begin
+        repeat (1000) begin
             #500 cadence_raw = 1;
             #500 cadence_raw = 0;
+        end
+
+	#100
+
+	torque = 12'h1AA;       // matches target waveform
+        curr   = 12'h1BA;
+        incline = 13'd0;
+        scale = 3'd3;
+        batt = 12'hF11;
+
+
+	 repeat (1000) begin
+            #1000 cadence_raw = 1;
+            #1000 cadence_raw = 0;
         end
 
         // Wait to observe exponential average behavior

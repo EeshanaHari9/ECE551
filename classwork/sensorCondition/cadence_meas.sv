@@ -1,8 +1,9 @@
-module cadence_meas (
+module cadence_meas #(parameter FAST_SIM = 1)
+(
     	input clk,
     	input rst_n,
     	input cadence_filt,
-    	input FAST_SIM,
+    	//input FAST_SIM,
     	output reg [7:0] cadence_per,
     	output reg not_pedaling
 );
