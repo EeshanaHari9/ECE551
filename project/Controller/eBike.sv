@@ -35,7 +35,7 @@
   // Declare internal interconnect signals //
   //////////////////////////////////////////
   wire rst_n;									// global reset from reset_synch
-  wire [11:0] torque, batt, curr, brake;		// Raw A2D results
+  
   wire signed [12:0] error;
   wire cadence;
   wire not_pedaling;
@@ -67,7 +67,10 @@
   ///////////////////////////////////////////////////////
   // Instantiate A2D_intf to read torque & batt level //
   /////////////////////////////////////////////////////
-  <instantiate A2D_intf>
+  //pass these onto the sensorCondition module
+  wire [11:0] torque, batt, curr, brake;		// Raw A2D results
+
+  //<instantiate A2D_intf>
   A2D_intf A2D_intf(
             .clk(clk),
             .rst_n(rst_n),
@@ -85,13 +88,26 @@
   // Instantiate SensorCondition block to filter & average //
   // readings and provide cadence_vec, and zero_cadence   //
   /////////////////////////////////////////////////////////
-  <instantiate sensorCondition> (include FAST_SIM)
+  //<instantiate sensorCondition> (include FAST_SIM)
   //exercise 22 -> make into one module 
+    sensorCondition sensorCondition #(paramater FAST_SIM = 1)(
+            .clk(clk),
+            .rst_n(rst_n),
+            .torque(torque), //comes from A2D_intf
+            .cadence_raw(cadence), //comes from cadence sensor
+            .curr(curr), //comes from A2D_intf
+            .incline(incline), //comes from inertial sensor
+            .scale(scale), //comes from PB_intf
+            .batt(batt), //comes from A2D_intf
+            .error(error), //this is the error value from the PID controller
+            .not_pedaling(not_pedaling), //this is the not pedaling value from the cadence sensor
+            .TX(TX) //this is the TX value from the PB_intf
+    );
 					   
   ///////////////////////////////////////////////////
   // Instantiate PID to determine drive magnitude //
   /////////////////////////////////////////////////		   
-  <instantiate PID> (include FAST_SIM)
+ // <instantiate PID> (include FAST_SIM)
     PID PID(
             .clk(clk),
             .rst_n(rst_n),
@@ -103,7 +119,7 @@
   ////////////////////////////////////////////////
   // Instantiate brushless DC motor controller //
   //////////////////////////////////////////////
-  <instantiate brushless>
+  //<instantiate brushless>
   brushless brushless(
             .clk(clk),
             .rst_n(rst_n),
