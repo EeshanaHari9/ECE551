@@ -1,0 +1,191 @@
+// -----------------------------------------------------------------------------
+// eBike top-level ? cleaned up for duplicate declarations & typos
+// **The brake-lever logic is left exactly as-is; only a declaration was added
+//   so it will compile, but the expression itself is unchanged.**
+// -----------------------------------------------------------------------------
+module eBike (
+    input  logic        clk,              // 50 MHz system clock
+    input  logic        RST_n,            // active-low push-button reset
+
+    // A/D converter interface (torque, curr, batt, brake)
+    output logic        A2D_SS_n,
+    output logic        A2D_SCLK,
+    output logic        A2D_MOSI,
+    input  logic        A2D_MISO,
+
+    // Hall sensors from the BLDC motor
+    input  logic        hallGrn,
+    input  logic        hallYlw,
+    input  logic        hallBlu,
+
+    // Gate-drive outputs to the BLDC motor FET bridge
+    output logic        highGrn,
+    output logic        lowGrn,
+    output logic        highYlw,
+    output logic        lowYlw,
+    output logic        highBlu,
+    output logic        lowBlu,
+
+    // Inertial (tilt) sensor interface
+    output logic        inertSS_n,
+    output logic        inertSCLK,
+    output logic        inertMOSI,
+    input  logic        inertMISO,
+    input  logic        inertINT,
+
+    // Miscellaneous inputs / outputs
+    input  logic        cadence,          // pedal cadence pulse
+    input  logic        tgglMd,           // push-button: mode toggle
+    output logic        TX,               // serial telemetry out
+    output logic [1:0]  LED               // mode indication
+);
+    //----------------------------------------------------------------------
+    // Parameters
+    //----------------------------------------------------------------------
+    parameter FAST_SIM = 1;               // 1 = accelerate simulation timing
+
+    //----------------------------------------------------------------------
+    // Internal inter-connect signals (ONE declaration each!)
+    //----------------------------------------------------------------------
+    logic               rst_n;
+
+    logic signed [12:0] error;
+    logic               not_pedaling;
+
+    logic        [10:0] duty;
+    logic        [1:0]  selGrn, selYlw, selBlu;
+
+    logic signed [12:0] incline;
+    logic        [11:0] drv_mag;
+
+    logic               brake_n;
+    logic               PWM_synch;
+
+    logic        [2:0]  scale;
+
+    logic [11:0] torque, batt, curr, brake;   // raw A/D values
+
+    //----------------------------------------------------------------------
+    // Brake lever: treat A/D reading as digital (below mid-rail = pressed)
+    // *** expression unchanged, only declaration above added ***
+    //----------------------------------------------------------------------
+    assign brake_n = (brake < 12'h800) ? 1'b0 : 1'b1;
+
+    //----------------------------------------------------------------------
+    // Reset synchroniser
+    //----------------------------------------------------------------------
+    reset_synch u_rst_synch (
+        .clk       (clk),
+        .rst_n     (RST_n),
+        .rst_n_out (rst_n)
+    );
+
+    //----------------------------------------------------------------------
+    // A2D interface ? reads torque, batt, curr, brake
+    //----------------------------------------------------------------------
+    A2D_intf u_A2D_intf (
+        .clk        (clk),
+        .rst_n      (rst_n),
+        .A2D_SS_n   (A2D_SS_n),
+        .A2D_SCLK   (A2D_SCLK),
+        .A2D_MOSI   (A2D_MOSI),
+        .A2D_MISO   (A2D_MISO),
+        .torque     (torque),
+        .batt       (batt),
+        .curr       (curr),
+        .brake      (brake)
+    );
+
+    //----------------------------------------------------------------------
+    // Sensor conditioning ? filtering, cadence vector, TX telemetry, etc.
+    //----------------------------------------------------------------------
+    sensorCondition #(.FAST_SIM(FAST_SIM)) u_sensorCondition (
+        .clk          (clk),
+        .rst_n        (rst_n),
+        .torque       (torque),
+        .cadence_raw  (cadence),
+        .curr         (curr),
+        .incline      (incline),
+        .scale        (scale),
+        .batt         (batt),
+        .error        (error),
+        .not_pedaling (not_pedaling),
+        .TX           (TX)
+    );
+
+    //----------------------------------------------------------------------
+    // PID controller ? decides drive magnitude
+    //----------------------------------------------------------------------
+    PID #(.FAST_SIM(FAST_SIM)) u_PID (
+        .clk          (clk),
+        .rst_n        (rst_n),
+        .error        (error),
+        .not_pedaling (not_pedaling),
+        .drv_mag      (drv_mag)
+    );
+
+    //----------------------------------------------------------------------
+    // Brushless-DC commutation core
+    //----------------------------------------------------------------------
+    brushless u_brushless (
+        .clk        (clk),
+        .rst_n      (rst_n),
+        .drv_mag    (drv_mag),
+        .hallGrn    (hallGrn),
+        .hallYlw    (hallYlw),
+        .hallBlu    (hallBlu),
+        .brake_n    (brake_n),
+        .PWM_synch  (PWM_synch),
+        .duty       (duty),
+        .selGrn     (selGrn),
+        .selYlw     (selYlw),
+        .selBlu     (selBlu)
+    );
+
+    //----------------------------------------------------------------------
+    // Motor-drive gate driver (generates FET gate signals + PWM_synch)
+    //----------------------------------------------------------------------
+    mtr_drv u_mtr_drv (
+        .clk        (clk),
+        .rst_n      (rst_n),
+        .duty       (duty),
+        .selGrn     (selGrn),
+        .selYlw     (selYlw),
+        .selBlu     (selBlu),
+        .PWM_synch  (PWM_synch),
+        .highGrn    (highGrn),
+        .lowGrn     (lowGrn),
+        .highYlw    (highYlw),
+        .lowYlw     (lowYlw),
+        .highBlu    (highBlu),
+        .lowBlu     (lowBlu)
+    );
+
+    //----------------------------------------------------------------------
+    // Inertial sensor interface ? provides signed pitch (incline)
+    //----------------------------------------------------------------------
+    inert_intf u_inert_intf (
+        .clk     (clk),
+        .rst_n   (rst_n),
+        .SS_n    (inertSS_n),
+        .MISO    (inertMISO),
+        .SCLK    (inertSCLK),
+        .MOSI    (inertMOSI),
+        .INT     (inertINT),
+        .incline (incline),
+        .vld     ()              // unused ?data-valid? flag
+    );
+
+    //----------------------------------------------------------------------
+    // Push-button interface ? selects assistance level & drives LEDs
+    //----------------------------------------------------------------------
+    PB_intf u_PB_intf (
+        .clk     (clk),
+        .rst_n   (rst_n),
+        .tgglMd  (tgglMd),
+        .scale   (scale),
+        .LED     (LED)
+    );
+
+endmodule
+
