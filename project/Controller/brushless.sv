@@ -1,3 +1,8 @@
+// brushless.sv
+// This module implements brushless DC motor commutation logic based on synchronized hall sensor signals. 
+// It determines the correct coil drive modes (forward, reverse, high-Z, or regen) and generates a PWM duty cycle for motor control.
+// Team VeriLeBron (Dustin, Shane, Quinn, Eeshana) 
+
 module brushless (
     	input wire clk,		//clk signal	
     	input wire rst_n,	//active low reset
@@ -20,8 +25,8 @@ module brushless (
 	*/
 );
 
-    	//sYnch to clk signal - flop hall inputs and store in reg
-    	reg hallGrn_d, hallYlw_d, hallBlu_d;
+    //sYnch to clk signal - flop hall inputs and store in reg
+    reg hallGrn_d, hallYlw_d, hallBlu_d;
 	reg hallGrn_meta, hallYlw_meta, hallBlu_meta;
 	reg synchGrn, synchYlw, synchBlu;
 

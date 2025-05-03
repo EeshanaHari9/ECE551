@@ -1,9 +1,28 @@
-module PID(
-	input clk,
-	input rst_n,
-	input [12:0] error,
-	input not_pedaling,
-	output [11:0] drv_mag
+// PID.sv
+// Implements a PID (Proportional-Integral-Derivative) controller for adaptive e-bike motor
+// assist. The module receives a signed error signal and determines a motor drive magnitude
+// (`drv_mag`) based on tuned P, I, and D terms.
+//
+// Features:
+// - Parameterized with FAST_SIM to accelerate simulation (shortens decimator timer)
+// - P-term: Proportional to error (sign-extended to 14 bits)
+// - I-term: Integrator with saturation and reset behavior when not pedaling
+// - D-term: Approximate derivative based on change in error over 3 decimated samples
+// - Decimation: All terms update at 1/48th of a second for stability
+// - Saturation: Ensures final `drv_mag` fits in 12-bit unsigned range (0 to 4095)
+//
+// Outputs a smooth, safe, and responsive drive magnitude used by the commutation logic
+// to control brushless motor assist.
+//
+// Team VeriLeBron (Dustin, Shane, Quinn, Eeshana)
+
+
+module PID #(parameter FAST_SIM = 0)(
+	input logic clk,
+	input logic rst_n,
+	input logic [12:0] error,
+	input logic not_pedaling,
+	output logic [11:0] drv_mag
 );
 
 	reg [17:0] error_ext;
@@ -17,8 +36,6 @@ module PID(
 	reg [17:0] q2;
 	reg done;
 	wire pos_ov;
-
-	parameter FAST_SIM = 0;
 	
 	wire decimator_full;
 

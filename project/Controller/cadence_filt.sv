@@ -1,6 +1,11 @@
-module cadence_filt #(
-    parameter FAST_SIM = 1
-)(
+// cadence_filt.sv
+// This module filters a noisy cadence signal from a mechanical slip-ring sensor by enforcing a minimum 1ms stability period  before updating the filtered output. 
+// It also detects rising edges of the filtered cadence signal.
+// The filter eliminates metastability and false transitions by synchronizing the input signal and using a stability counter.
+// Team VeriLeBron (Dustin, Shane, Quinn, Eeshana)
+
+module cadence_filt #(parameter FAST_SIM = 0)
+(
     input  logic clk,
     input  logic rst_n,
     input  logic cadence,

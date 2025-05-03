@@ -1,10 +1,35 @@
+// telemetry.sv
+// Sends periodic telemetry packets over UART containing battery voltage, average
+// motor current, and average torque values. The module transmits a fixed 8-byte
+// packet once every ~48Hz based on a 20-bit timing counter.
+//
+// Packet format (8 bytes total):
+//   Byte 0: 0xAA      (delimiter 1)
+//   Byte 1: 0x55      (delimiter 2)
+//   Byte 2: batt_v[11:8] (padded upper nibble)
+//   Byte 3: batt_v[7:0]
+//   Byte 4: avg_curr[11:8] (padded upper nibble)
+//   Byte 5: avg_curr[7:0]
+//   Byte 6: avg_torque[11:8] (padded upper nibble)
+//   Byte 7: avg_torque[7:0]
+//
+// Features:
+// - UART transmission using external `UART_tx` module
+// - Clock-based pacing: 50 MHz system clock divided down using a 20-bit counter
+// - Rotates out 8-byte packet using a shifter and byte counter
+// - Outputs single-byte `tx_data` and pulses `trmt` to request UART transmission
+//
+// Used to monitor e-bike status wirelessly or over serial connection.
+//
+// Team VeriLeBron (Dustin, Shane, Quinn, Eeshana)
+
 module telemetry (batt_v, avg_curr, avg_torque, clk, rst_n, TX);
 
- input [11:0] batt_v;
- input [11:0] avg_curr;
- input [11:0] avg_torque;
- input clk, rst_n;
- output TX;
+ input logic [11:0] batt_v;
+ input logic [11:0] avg_curr;
+ input logic [11:0] avg_torque;
+ input logic clk, rst_n;
+ output logic TX;
 
 //-----intialize the uart_tx-----------------------------------
  logic trmt;

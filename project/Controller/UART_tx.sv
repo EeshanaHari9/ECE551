@@ -3,10 +3,10 @@ module UART_tx(clk,rst_n,TX,trmt,tx_data,tx_done);
 /////////////////////////////////////////////////////////////////
 // Intentionally obfuscated model of UART_tx with 115200 baud //
 ///////////////////////////////////////////////////////////////
-input clk,rst_n;		// clock and active low reset
-input trmt;				// trmt tells TX section to transmit tx_data
-input [7:0] tx_data;	// byte to transmit
-output TX, tx_done;		// tx_done asserted when transmission complete
+input logic clk,rst_n;		// clock and active low reset
+input logic trmt;				// trmt tells TX section to transmit tx_data
+input logic [7:0] tx_data;	// byte to transmit
+output logic TX, tx_done;		// tx_done asserted when transmission complete
 
 reg n001,n002;
 reg [8:0] n003;

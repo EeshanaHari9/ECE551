@@ -1,8 +1,13 @@
-module cadence_meas #(parameter FAST_SIM = 1)
+// cadence_meas.sv
+// Measures the time between rising edges of a filtered cadence signal to determine how fast the rider is pedaling.
+// If no cadence signal is detected within 1/3 of a second, the module flags that the rider is not pedaling.
+// Team VeriLeBron (Dustin, Shane, Quinn, Eeshana) 
+
+module cadence_meas #(parameter FAST_SIM = 0)
 (
-    	input clk,
-    	input rst_n,
-    	input cadence_filt,
+    	input logic clk,
+    	input logic rst_n,
+    	input logic cadence_filt,
     	//input FAST_SIM,
     	output reg [7:0] cadence_per,
     	output reg not_pedaling

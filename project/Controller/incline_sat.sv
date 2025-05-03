@@ -1,20 +1,17 @@
-/*
-if ((number is negative) &&
-(any upper bits (in certain range) are zero)) {
-saturate to most negative number
-}
-else if ((number is positive) &&
-(any upper bits (in certain range) are one)) {
-saturate to most positive number
-}
-else {
-number not too positive so just copy over lower bits
-}
+// incline_sat.sv
+// Performs 10-bit saturation on a signed 13-bit incline input.
+// Prevents out-of-range incline values from skewing the assist computation
+// by clipping positive overflow to +511 and negative overflow to -512.
+// For non-overflowing inputs, it sign-extends and passes through the value.
+//
+// This is used in the `desiredDrive` module to safely include incline in the assist
+// product calculation, keeping values within a controlled range.
+//
+// Team VeriLeBron (Dustin, Shane, Quinn, Eeshana)
 
-*/
 module incline_sat(
-	input [12:0] incline,
-    	output [9:0] incline_sat
+	input logic [12:0] incline,
+    	output logic [9:0] incline_sat
 );
 
     	wire ovfl_bits_pos, ovfl_bits_neg;

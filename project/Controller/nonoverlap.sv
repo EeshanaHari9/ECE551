@@ -1,3 +1,18 @@
+// nonoverlap.sv
+// Ensures safe switching between high-side and low-side FETs on a motor leg by
+// enforcing a dead time whenever input signals change. This prevents shoot-through
+// conditions by delaying the propagation of changes to gate drive outputs.
+//
+// The module monitors `highIn` and `lowIn` for changes. When a change is detected,
+// it resets an internal 5-bit counter and holds both outputs (`highOut`, `lowOut`) low
+// until 32 clock cycles of stability have passed. Once the dead time elapses without
+// further changes, outputs are allowed to follow their respective inputs.
+//
+// This module is used in `mtr_drv.sv` to apply non-overlap protection between
+// high-side and low-side gate signals for each motor phase.
+//
+// Team VeriLeBron (Dustin, Shane, Quinn, Eeshana)
+
 module nonoverlap(clk, rst_n, highIn, lowIn, highOut, lowOut);
 
  input logic clk, rst_n, highIn, lowIn;

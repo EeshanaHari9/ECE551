@@ -1,15 +1,35 @@
-module sensorCondition #(parameter FAST_SIM = 1) (
-    input  clk,
-    input  rst_n,
-    input  [11:0] torque,
-    input  cadence_raw,
-    input  [11:0] curr,
-    input  [12:0] incline,
-    input  [2:0]  scale,
-    input  [11:0] batt,
+// sensorCondition.sv
+// Performs signal conditioning for various sensor inputs used in e-bike control logic,
+// including torque, cadence, current, and battery voltage. This module computes
+// key metrics such as filtered cadence, exponential averages for current and torque,
+// and an `error` signal to drive the PID controller.
+//
+// Features:
+// - Debounces and filters raw cadence input (via `cadence_filt`)
+// - Measures time between pedal strokes to detect pedaling vs coasting
+// - Smooths motor current and torque input using exponential averaging
+// - Computes a target current based on rider effort, incline, and scale
+// - Outputs the error signal: target current - average current (only if pedaling & battery OK)
+// - Drives UART telemetry with battery, torque, and current information
+//
+// Also supports FAST_SIM mode to accelerate simulation via reduced timer windows.
+//
+// Team VeriLeBron (Dustin, Shane, Quinn, Eeshana)
+
+
+module sensorCondition #(parameter FAST_SIM = 0)
+(
+    input logic  clk,
+    input logic  rst_n,
+    input logic  [11:0] torque,
+    input logic  cadence_raw,
+    input logic  [11:0] curr,
+    input logic  [12:0] incline,
+    input logic  [2:0]  scale,
+    input logic  [11:0] batt,
     output reg [12:0] error,
-    output not_pedaling,
-    output TX
+    output logic not_pedaling,
+    output logic TX
 );
 
     localparam [11:0] LOW_BATT_THRES = 12'hA98;
@@ -67,7 +87,7 @@ module sensorCondition #(parameter FAST_SIM = 1) (
             curr_accum <= 1'b0;
         end
         else if (include_curr) begin
-            curr_accum <= (curr_accum * 3 >> 2) + curr;
+            curr_accu m <= (curr_accum * 3 >> 2) + curr;
         end
     end
 
@@ -88,17 +108,17 @@ module sensorCondition #(parameter FAST_SIM = 1) (
         end
         else begin
             not_pedaling_torque <= not_pedaling;
-	/*
+	
             if (pedaling_start) begin
                 torque_accum <= {1'b0,torque,4'b0};
 	    end
             else if (cadence_rise) begin
                 torque_accum <= ((torque_accum * 31) >> 5) + torque;
 	    end
-	*/
+	
         end
     end
-
+/*
 	always_ff @(posedge clk or negedge rst_n) begin
 		if (pedaling_start) begin
                 	torque_accum <= {1'b0,torque,4'b0};
@@ -107,7 +127,7 @@ module sensorCondition #(parameter FAST_SIM = 1) (
                 	torque_accum <= ((torque_accum * 31) >> 5) + torque;
 	    	end
 	end
-
+*/
 
     assign avg_torque = torque_accum[16:5];
 

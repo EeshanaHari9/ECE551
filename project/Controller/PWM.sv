@@ -1,7 +1,23 @@
+// PWM.sv
+// Generates a glitch-free PWM signal (`PWM_sig`) with a specified duty cycle,
+// and emits a single-cycle synchronization pulse (`PWM_synch`) once per PWM cycle.
+//
+// Features:
+// - 11-bit internal counter (0 to 2047) gives fine-grained duty control
+// - `PWM_sig` is high when the counter is less than the input `duty`
+// - `PWM_synch` pulses high when the counter equals 1, used by commutation logic
+//   (e.g., brushless.sv) to align switching with the PWM cycle
+// - Fully glitch-free through flopped logic (`q1`, `PWM_sig`)
+//
+// Used within `mtr_drv.sv` to generate PWM waveforms for FET drivers.
+//
+// Team VeriLeBron (Dustin, Shane, Quinn, Eeshana)
+
+
 module PWM (
-	input clk,	
-	input rst_n,		//asynch reset
-	input [10:0] duty,	//specified duty cycle
+	input logic clk,	
+	input logic rst_n,		//asynch reset
+	input logic [10:0] duty,	//specified duty cycle
 	output reg PWM_sig,		//PWM signal out 
 	output reg PWM_synch	//when cnt is 11'h001 output a signal to allow commutator to synch PWM
 
