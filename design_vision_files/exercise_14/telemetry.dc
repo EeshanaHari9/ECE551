@@ -1,0 +1,67 @@
+#read in files
+###################################
+read_file -format sverilog { telemetry.sv UART_tx.sv }
+
+#set the top level design 
+############################
+set current_design telemetry
+
+#link to hierarchy
+############################
+link
+
+#clock definition - 2.5ns period
+####################
+create_clock -name "clk" -period 2.5 -waveform {0 1.25} {clk} 
+set_dont_touch_network [find port clk]  
+
+#input delay definition
+#######################
+set prim_inputs [remove_from_collection [all_inputs] [find port clk]]
+set_input_delay -clock clk 0.5 $prim_inputs  
+
+#drive strengths
+##########################
+set_driving_cell -lib_cell NAND2X1_LVT -library saed32lvt_tt0p85v25c $prim_inputs 
+set_drive 0.0001 rst_n 
+
+#output delay - 0.75ns
+#output load 0.15pF
+#######################
+set_output_delay -clock clk 0.75 [all_outputs] 
+set_load 0.15 [all_outputs]  
+
+#set max transition time
+###############################
+set_max_transition 0.15 [current_design]  
+
+#wire load 
+##########################
+set_wire_load_model -name 16000 -library saed32lvt_tt0p85v25c  
+
+#compile
+######################
+compile -map_effort medium
+
+#flatten
+######################
+ungroup -all -flatten  
+
+#recompile with medium effort 
+##############################
+compile -map_effort medium
+
+#generate reports as txt files
+####################
+report_timing -delay min > telemetry_min_delay.txt  
+report_timing -delay max > telemetry_max_delay.txt  
+report_area > telemetry_area.txt  
+
+# Write out final synthesized netlist #
+#######################################
+write -format verilog -hierarchy -output telemetry.vg 
+
+# Cleanup #
+###########
+remove_design -all  
+
