@@ -1,4 +1,4 @@
-﻿# ⚡ eBike Controller by Team VeriLebron (ECE551-Spring2025)
+﻿# ⚡ eBike Controller (ECE551-Spring2025)
 
 ## 🛠 Synthesis
 
