@@ -1,0 +1,77 @@
+############################################################
+#  PID.sv synthesis script — UPDATED TO NEW CONSTRAINT SET  #
+############################################################
+
+# ------------ 1. Read RTL -----------------
+read_file -format sverilog PID.sv  
+
+# ------------ 2. Set top level ------------
+current_design PID
+
+# ------------ 3. Clock definition ---------
+# 400 MHz  ⇒  2.5 ns period, 50 % duty-cycle
+create_clock -name clk -period 2.5 -waveform {0 1.25} {clk}
+
+# Hold/uncertainty budget (±0.15 ns on both edges)
+set_clock_uncertainty 0.15 [get_clocks clk]
+
+# Do not let DC optimise or gate the clock network
+set_dont_touch_network [get_ports clk]
+
+# ------------ 4. Primary-input list -------
+set prim_inputs [remove_from_collection [all_inputs] [get_ports clk]]
+
+# ------------ 5. Input constraints --------
+# 0.3 ns after rising edge
+set_input_delay 0.3 -clock clk $prim_inputs
+
+# Drive strength: equivalent to NAND2X2_LVT in SAED 32 nm library
+set_driving_cell      -library saed32lvt_tt0p85v25c \
+                      -lib_cell NAND2X2_LVT          \
+                      [copy_collection $prim_inputs]
+
+# ------------ 6. Activity for power -------
+set_switching_activity -static_probability 0.5 -toggle_rate 0.25 \
+                       -base_clock clk            [copy_collection $prim_inputs]
+
+
+# ------------ 7. Slew / transition limit --
+# 0.20 ns max rise/fall at all nets
+set_max_transition 0.20 [current_design]
+
+# ------------ 8. Output constraints -------
+# 0.5 ns **before** next rising edge of clk
+set_output_delay 0.5 -clock clk [all_outputs]
+
+# 50 fF capacitive load on every output  (0.05 pF)
+set_load 0.05 [all_outputs]
+
+# ------------ 9. Wire-load model ----------
+set_wire_load_model -name 16000 -library saed32lvt_tt0p85v25c
+
+# ------------ 10. First compile (medium) --
+compile -map_effort medium
+check_design
+report_area
+report_timing -path full -delay max
+report_timing -path full -delay min
+
+# ------------ 11. Flatten/retime ----------
+ungroup -all -flatten
+set_fix_hold clk    ;# add hold buffers as needed
+compile -map_effort medium
+
+# ------------ 12. Post-compile reports ----
+check_design
+report_area
+report_timing -path full -delay max
+report_timing -path full -delay min
+
+# Power (after activity propagation, if desired)
+# propagate_switching_activity
+report_power
+
+# ------------ 13. Save reports ------------
+report_timing -delay min  > PID_min_delay.txt
+report_timing -delay max  > PID_max_delay.txt
+report_area               > PID_area.txt
