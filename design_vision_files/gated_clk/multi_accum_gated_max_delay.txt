@@ -1,0 +1,111 @@
+ 
+****************************************
+Report : timing
+        -path full
+        -delay max
+        -max_paths 1
+Design : mult_accum
+Version: V-2023.12-SP5
+Date   : Wed Apr  9 11:59:41 2025
+****************************************
+
+Operating Conditions: tt0p85v25c   Library: saed32lvt_tt0p85v25c
+Wire Load Model Mode: enclosed
+
+  Startpoint: prod_reg_reg[0]
+              (rising edge-triggered flip-flop clocked by clk)
+  Endpoint: accum_reg[63]
+            (rising edge-triggered flip-flop clocked by clk)
+  Path Group: clk
+  Path Type: max
+
+  Des/Clust/Port     Wire Load Model       Library
+  ------------------------------------------------
+  mult_accum         16000                 saed32lvt_tt0p85v25c
+
+  Point                                    Incr       Path
+  -----------------------------------------------------------
+  clock clk (rise edge)                    0.00       0.00
+  clock network delay (ideal)              0.00       0.00
+  prod_reg_reg[0]/CLK (DFFX1_LVT)          0.00       0.00 r
+  prod_reg_reg[0]/Q (DFFX1_LVT)            0.08       0.08 r
+  U6816/Y (AND2X1_LVT)                     0.05       0.13 r
+  add_27/U1_1/CO (FADDX1_LVT)              0.08       0.20 r
+  add_27/U1_2/CO (FADDX1_LVT)              0.08       0.29 r
+  add_27/U1_3/CO (FADDX1_LVT)              0.08       0.37 r
+  add_27/U1_4/CO (FADDX1_LVT)              0.08       0.45 r
+  add_27/U1_5/CO (FADDX1_LVT)              0.08       0.53 r
+  add_27/U1_6/CO (FADDX1_LVT)              0.08       0.61 r
+  add_27/U1_7/CO (FADDX1_LVT)              0.08       0.69 r
+  add_27/U1_8/CO (FADDX1_LVT)              0.08       0.78 r
+  add_27/U1_9/CO (FADDX1_LVT)              0.08       0.86 r
+  add_27/U1_10/CO (FADDX1_LVT)             0.08       0.94 r
+  add_27/U1_11/CO (FADDX1_LVT)             0.08       1.02 r
+  add_27/U1_12/CO (FADDX1_LVT)             0.08       1.10 r
+  add_27/U1_13/CO (FADDX1_LVT)             0.08       1.18 r
+  add_27/U1_14/CO (FADDX1_LVT)             0.08       1.26 r
+  add_27/U1_15/CO (FADDX1_LVT)             0.08       1.35 r
+  add_27/U1_16/CO (FADDX1_LVT)             0.08       1.43 r
+  add_27/U1_17/CO (FADDX1_LVT)             0.08       1.51 r
+  add_27/U1_18/CO (FADDX1_LVT)             0.08       1.59 r
+  add_27/U1_19/CO (FADDX1_LVT)             0.08       1.67 r
+  add_27/U1_20/CO (FADDX1_LVT)             0.08       1.75 r
+  add_27/U1_21/CO (FADDX1_LVT)             0.08       1.83 r
+  add_27/U1_22/CO (FADDX1_LVT)             0.08       1.92 r
+  add_27/U1_23/CO (FADDX1_LVT)             0.08       2.00 r
+  add_27/U1_24/CO (FADDX1_LVT)             0.08       2.08 r
+  add_27/U1_25/CO (FADDX1_LVT)             0.08       2.16 r
+  add_27/U1_26/CO (FADDX1_LVT)             0.08       2.24 r
+  add_27/U1_27/CO (FADDX1_LVT)             0.08       2.32 r
+  add_27/U1_28/CO (FADDX1_LVT)             0.08       2.40 r
+  add_27/U1_29/CO (FADDX1_LVT)             0.08       2.49 r
+  add_27/U1_30/CO (FADDX1_LVT)             0.08       2.57 r
+  add_27/U1_31/CO (FADDX1_LVT)             0.09       2.65 r
+  U6459/Y (NAND3X0_LVT)                    0.05       2.70 f
+  U6900/Y (INVX1_LVT)                      0.04       2.74 r
+  U6458/Y (NAND3X0_LVT)                    0.04       2.79 f
+  U6901/Y (INVX1_LVT)                      0.04       2.83 r
+  U6457/Y (NAND3X0_LVT)                    0.04       2.88 f
+  U6913/Y (INVX1_LVT)                      0.04       2.92 r
+  U6456/Y (NAND3X0_LVT)                    0.04       2.96 f
+  U6912/Y (INVX1_LVT)                      0.04       3.01 r
+  U6455/Y (NAND3X0_LVT)                    0.04       3.05 f
+  U6911/Y (INVX1_LVT)                      0.04       3.09 r
+  U6454/Y (NAND3X0_LVT)                    0.04       3.14 f
+  U6910/Y (INVX1_LVT)                      0.04       3.18 r
+  U6453/Y (NAND3X0_LVT)                    0.04       3.22 f
+  U6909/Y (INVX1_LVT)                      0.04       3.27 r
+  U6452/Y (NAND3X0_LVT)                    0.04       3.31 f
+  U6908/Y (INVX1_LVT)                      0.04       3.35 r
+  U6451/Y (NAND3X0_LVT)                    0.04       3.40 f
+  U6907/Y (INVX1_LVT)                      0.04       3.44 r
+  U6450/Y (NAND3X0_LVT)                    0.04       3.49 f
+  U6906/Y (INVX1_LVT)                      0.04       3.53 r
+  U6449/Y (NAND3X0_LVT)                    0.04       3.57 f
+  U6905/Y (INVX1_LVT)                      0.04       3.62 r
+  U6448/Y (NAND3X0_LVT)                    0.04       3.66 f
+  U6904/Y (INVX1_LVT)                      0.04       3.70 r
+  U6447/Y (NAND3X0_LVT)                    0.04       3.75 f
+  U6903/Y (INVX1_LVT)                      0.04       3.79 r
+  U6446/Y (NAND3X0_LVT)                    0.04       3.83 f
+  U6902/Y (INVX1_LVT)                      0.04       3.88 r
+  U6445/Y (NAND3X0_LVT)                    0.04       3.92 f
+  U6444/Y (AO21X1_LVT)                     0.06       3.98 f
+  U6938/Y (AOI21X1_LVT)                    0.05       4.04 r
+  U6937/Y (OAI21X1_LVT)                    0.07       4.10 f
+  accum_reg[63]/D (DFFX1_LVT)              0.01       4.11 f
+  data arrival time                                   4.11
+
+  clock clk (rise edge)                    5.00       5.00
+  clock network delay (ideal)              0.00       5.00
+  accum_reg[63]/CLK (DFFX1_LVT)            0.00       5.00 r
+  library setup time                      -0.03       4.97
+  data required time                                  4.97
+  -----------------------------------------------------------
+  data required time                                  4.97
+  data arrival time                                  -4.11
+  -----------------------------------------------------------
+  slack (MET)                                         0.86
+
+
+1
