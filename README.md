@@ -6,7 +6,7 @@ The design is targetted to run on the DE-0 Nano FPGA board.
 
 ## 👥 Team Members
 
-Dustin Nguyen, Shane O'Donnell, Quinn Johnson
+Dustin Nguyen, Shane O'Donnell, Quinn Johnson, Eeshana Hari
 
 ## 📜 License
 
